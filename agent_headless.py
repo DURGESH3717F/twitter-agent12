@@ -1,6 +1,7 @@
 # agent_headless.py
 # This is a "headless" version of the Twitter Expert Agent, designed to be run
 # automatically on a server using services like GitHub Actions. It has no GUI.
+# VERSION UPDATE: More robust login sequence.
 
 import time
 import json
@@ -71,22 +72,27 @@ class HeadlessTwitterAgent:
             wait = WebDriverWait(self.driver, 20)
             
             # Enter username
+            self._log_message("Entering username...")
             user_input = wait.until(EC.presence_of_element_located((By.NAME, "text")))
             user_input.send_keys(self.secrets['TWITTER_USERNAME'])
             
             # Find and click the "Next" button
+            self._log_message("Clicking 'Next'...")
             all_buttons = self.driver.find_elements(By.XPATH, "//div[@role='button']")
             next_button = [btn for btn in all_buttons if btn.text == "Next"][0]
             next_button.click()
             
             # Enter password
+            self._log_message("Entering password...")
             pass_input = wait.until(EC.presence_of_element_located((By.NAME, "password")))
             pass_input.send_keys(self.secrets['TWITTER_PASSWORD'])
             
             # Find and click the "Log in" button
+            self._log_message("Clicking 'Log in'...")
             wait.until(EC.element_to_be_clickable((By.XPATH, "//div[@data-testid='LoginForm_Login_Button']"))).click()
 
             # Verify login by waiting for the home timeline
+            self._log_message("Waiting for home feed to load...")
             wait.until(EC.presence_of_element_located((By.XPATH, "//div[@data-testid='primaryColumn']")))
             self._log_message("Login successful.", "SUCCESS")
             return True
